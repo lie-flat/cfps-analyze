@@ -1,0 +1,5 @@
+mysql-connector-python
+numpy
+pandas
+sqlalchemy
+matplotlib
