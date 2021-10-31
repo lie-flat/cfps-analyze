@@ -66,3 +66,7 @@ cc = [cfps[x].child for x in cfps if x< 2018]
 len(reduce(set.intersection, (set(x.schema.keys()) for x in cc))) # 85
 ```
 
+## adult
+
+2010 到 2016， 有85个公共字段
+
