@@ -60,6 +60,20 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "mysql db write-one 2010 famecon",
+            "type": "python",
+            "request": "launch",
+            "program": "process/mysql_storage.py",
+            "args": [
+                "db",
+                "write-one",
+                "2010",
+                "famecon"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        },
+        {
             "name": "mysql dry write",
             "type": "python",
             "request": "launch",
@@ -80,6 +94,47 @@
                 "dry",
                 "write",
                 "2018"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "mysql db write 2018",
+            "type": "python",
+            "request": "launch",
+            "program": "process/mysql_storage.py",
+            "args": [
+                "db",
+                "write",
+                "2018"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "mysql db write 2010 2016",
+            "type": "python",
+            "request": "launch",
+            "program": "process/mysql_storage.py",
+            "args": [
+                "db",
+                "write",
+                "2010",
+                "2016"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "mysql db write-one 2016 famconf",
+            "type": "python",
+            "request": "launch",
+            "program": "process/mysql_storage.py",
+            "args": [
+                "db",
+                "write-one",
+                "2016",
+                "famconf"
             ],
             "justMyCode": true,
             "console": "integratedTerminal"
