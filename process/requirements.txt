@@ -3,3 +3,5 @@ numpy
 pandas
 sqlalchemy
 matplotlib
+PyMySQL
+tqdm
