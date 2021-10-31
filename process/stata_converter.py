@@ -6,15 +6,24 @@ import sys
 BASIC_MAPPING_A = {-10: '无法判断', -9: '缺失', -8: '不适用', -2: '拒绝回答', -1: '不知道'}
 BASIC_MAPPING_B = {-9: '缺失', -8: '不适用', -2: '拒绝回答', -1: '不知道'}
 BASIC_MAPPINGS = [BASIC_MAPPING_A, BASIC_MAPPING_B,  {
-    "-10": "无法判断",
-    "-9": "缺失",
-    "-8": "不适用",
-    "-2": "拒绝回答",
-    "-1": "不知道",
-    "1": "是",
-    "5": "否",
-    "79": "情况不适用"
-}]
+    -10: "无法判断",
+    -9: "缺失",
+    -8: "不适用",
+    -2: "拒绝回答",
+    -1: "不知道",
+    1: "是",
+    5: "否",
+    79: "情况不适用"
+}, {
+    -10: "无法判断",
+    -9: "缺失",
+    -8: "不适用",
+    -2: "拒绝回答",
+    -1: "不知道",
+    77: "其他",
+    78: "以上都没有",
+    79: "没有"
+}, ]
 
 
 def is_basic_mapping(mapping):
@@ -44,6 +53,12 @@ def convert_numpy_indexed_dict_to_serializable_dict(dic):
     return {key.item(): dic[key] for key in dic}
 
 
+def any_number_not_in_enum_range(df_col, range):
+    return any(num not in range and not pd.isna(num) for num in df_col)
+
+def convert_to_serializable_num(n):
+    return n.item() if 'item' in dir(n) else n
+
 def write_sta_file_variable_schemas(reader, df, sta_path):
     print(f"Processing: {sta_path}")
     with open(sta_path + '.schemas.json', 'w', encoding='utf-8') as f:
@@ -54,7 +69,8 @@ def write_sta_file_variable_schemas(reader, df, sta_path):
             'key': labels[key],
             'range': convert_numpy_indexed_dict_to_serializable_dict(vlabels[key]) if not is_basic_mapping(vlabels.get(key, BASIC_MAPPING_A))
             else list(v.item() if 'item' in dir(v) else v for v in df[key].unique()),
-            'details': []
+            'details': [],
+            'minmax': list(map(convert_to_serializable_num,[df[key].min(), df[key].max()])) if df[key].dtype != 'object' else None
         } for key in labels}
         for x in schemas:
             value = schemas[x]
@@ -62,6 +78,11 @@ def write_sta_file_variable_schemas(reader, df, sta_path):
                 if all(num.is_integer() for num in value['range']):
                     value['range'] = [int(x) for x in value['range']]
                     value['type'] = 'int32'
+            # elif value['type'] == 'enum':
+            #     if any(not isinstance(num, int) for num in value['range']):
+            #         value['type'] = 'float64'
+            #         value['labels'] = value['range']
+            #         value['range'] = list(v.item() if 'item' in dir(v) else v for v in df[x].unique())
             if len(value['range']) == len(df[x]):
                 value['range'] = {"min": min(
                     value['range']), "max": max(value['range'])}
