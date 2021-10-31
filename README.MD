@@ -175,3 +175,52 @@ cfps2011.adult.schema # 返回 Schema 字典
 cfps2011.adult.data # 返回 Pandas DataFrame (Lazy load)
 ```
 
+### 直接写入数据库
+
+为应用程序创建 MySQL 数据库账户, 然后修改 `process/mysql_storage.py` 中的数据库连接配置。
+
+运行以下命令初始化数据库
+
+```sh
+python process/mysql_storage.py db init
+```
+
+运行以下命令将所有数据写入数据库：
+
+（注意：你需要先生成 schemas 文件，参见上文）
+
+```sh
+python process/mysql_storage.py db write
+```
+
+在写入数据库时，应用程序会显示进度条：
+
+```output
+.......
+100%|███████████████████████████████████████████████████████████████| 58504/58504 [04:17<00:00, 227.63it/s]
+Creating famecon_2018...
+100%|███████████████████████████████████████████████████████████████| 14218/14218 [01:06<00:00, 212.51it/s]
+```
+
+如果需要 dry-run, 只需要把上述命令中的 db 替换为 dry
+
+#### 高级用法
+
+将 `start_year` 到 `end_year` (闭区间) 的数据入库
+
+```sh
+python process/mysql_storage.py db write [start_year=2010] [end_year=2018]
+```
+
+将指定表的数据入库
+
+```sh
+python process/mysql_storage.py db write-one <year> <table_base_name>
+```
+
+例如
+
+```sh
+python process/mysql_storage.py db write-one 2011 adult
+```
+
