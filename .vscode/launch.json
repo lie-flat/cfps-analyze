@@ -5,12 +5,95 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: 当前文件",
+            "name": "gen-schemas",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "args": ["gen-schemas", "dataset"],
+            "program": "process/stata_converter.py",
+            "args": [
+                "gen-schemas",
+                "dataset"
+            ],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "gen-labels",
+            "type": "python",
+            "request": "launch",
+            "program": "process/stata_converter.py",
+            "args": [
+                "gen-labels",
+                "dataset"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "analyze-years",
+            "type": "python",
+            "request": "launch",
+            "program": "process/fields_analyzer.py",
+            "args": [
+                "years"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "mysql db init",
+            "type": "python",
+            "request": "launch",
+            "program": "process/mysql_storage.py",
+            "args": [
+                "db",
+                "init"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "mysql db write",
+            "type": "python",
+            "request": "launch",
+            "program": "process/mysql_storage.py",
+            "args": [
+                "db",
+                "write"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "mysql dry write",
+            "type": "python",
+            "request": "launch",
+            "program": "process/mysql_storage.py",
+            "args": [
+                "dry",
+                "write"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "mysql dry write 2018",
+            "type": "python",
+            "request": "launch",
+            "program": "process/mysql_storage.py",
+            "args": [
+                "dry",
+                "write",
+                "2018"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "cfps-shell",
+            "type": "python",
+            "request": "launch",
+            "module": "IPython",
+            "args": [
+                "-i",
+                "process/cfps_shell.py"
+            ],
+            "console": "integratedTerminal",
         }
     ]
 }
