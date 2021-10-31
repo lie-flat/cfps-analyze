@@ -78,11 +78,6 @@ def write_sta_file_variable_schemas(reader, df, sta_path):
                 if all(num.is_integer() for num in value['range']):
                     value['range'] = [int(x) for x in value['range']]
                     value['type'] = 'int32'
-            # elif value['type'] == 'enum':
-            #     if any(not isinstance(num, int) for num in value['range']):
-            #         value['type'] = 'float64'
-            #         value['labels'] = value['range']
-            #         value['range'] = list(v.item() if 'item' in dir(v) else v for v in df[x].unique())
             if len(value['range']) == len(df[x]):
                 value['range'] = {"min": min(
                     value['range']), "max": max(value['range'])}
