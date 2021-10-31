@@ -5,10 +5,24 @@ import sys
 
 BASIC_MAPPING_A = {-10: '无法判断', -9: '缺失', -8: '不适用', -2: '拒绝回答', -1: '不知道'}
 BASIC_MAPPING_B = {-9: '缺失', -8: '不适用', -2: '拒绝回答', -1: '不知道'}
+BASIC_MAPPINGS = [BASIC_MAPPING_A, BASIC_MAPPING_B,  {
+    "-10": "无法判断",
+    "-9": "缺失",
+    "-8": "不适用",
+    "-2": "拒绝回答",
+    "-1": "不知道",
+    "1": "是",
+    "5": "否",
+    "79": "情况不适用"
+}]
 
 
 def is_basic_mapping(mapping):
-    return mapping == BASIC_MAPPING_A or mapping == BASIC_MAPPING_B
+    # Do not use `in` here. Check equality instead of references.
+    for m in BASIC_MAPPINGS:
+        if mapping == m:
+            return True
+    return False
 
 
 def convert_sta_file_to_reader(file_path):
@@ -39,7 +53,7 @@ def write_sta_file_variable_schemas(reader, df, sta_path):
             'type': 'enum' if not is_basic_mapping(vlabels.get(key, BASIC_MAPPING_A)) else str(df[key].dtype),
             'key': labels[key],
             'range': convert_numpy_indexed_dict_to_serializable_dict(vlabels[key]) if not is_basic_mapping(vlabels.get(key, BASIC_MAPPING_A))
-            else list(v.item() if df[key].dtype.kind == 'i' else v for v in df[key].unique()),
+            else list(v.item() if 'item' in dir(v) else v for v in df[key].unique()),
             'details': []
         } for key in labels}
         for x in schemas:
@@ -47,10 +61,11 @@ def write_sta_file_variable_schemas(reader, df, sta_path):
             if value['type'] == 'float64':
                 if all(num.is_integer() for num in value['range']):
                     value['range'] = [int(x) for x in value['range']]
-                    value['type'] = 'int32' if max(value['range']) < 2147483648 else 'int64'
+                    value['type'] = 'int32'
             if len(value['range']) == len(df[x]):
-                value['range'] = None
-                value['details'].append(f"{x} 取值各不相同，疑似 ID，已自动省略 range")
+                value['range'] = {"min": min(
+                    value['range']), "max": max(value['range'])}
+                value['details'].append(f"{x} 取值各不相同，疑似 ID，已转换 range 为最大、最小值")
             elif len(value['range']) > 500 and value['type'] != 'enum':
                 value['range'] = {"min": min(
                     value['range']), "max": max(value['range'])}
@@ -72,7 +87,7 @@ if __name__ == "__main__":
         print("错误！指定的目录不存在。")
         sys.exit(1)
     match sys.argv[1]:
-        case "gen-var-label":
+        case "gen-labels":
             for root, dirs, files in os.walk(dir_path):
                 for file in files:
                     if file.endswith(".dta"):
