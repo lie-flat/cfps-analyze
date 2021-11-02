@@ -105,6 +105,7 @@ dataset
 
 ### 依赖安装
 
+- 建议使用 Linux 操作系统
 - 在安装依赖之前，请确认你所使用的 Python 版本不低于 3.10
 - ipython 为推荐依赖项，也可以不安装
 
@@ -177,7 +178,24 @@ cfps2011.adult.data # 返回 Pandas DataFrame (Lazy load)
 
 ### 直接写入数据库
 
+启动数据库（如已启动，请忽略）, 进入 Mysql Shell
+
+本文假设您在 Linux 环境下操作，Windows 用户请自行执行下面的指令对应的操作。
+
+```sh
+sudo systemctl start mysql
+sudo mysql
+```
+
 为应用程序创建 MySQL 数据库账户, 然后修改 `process/mysql_storage.py` 中的数据库连接配置。
+
+注意： 下列命令给了 cfps 全部权限，在生产环境中请按需修改!
+
+```sql
+CREATE USER 'cfps'@'localhost' IDENTIFIED BY 'cfpsMySQL111++';
+GRANT ALL PRIVILEGES ON * . * TO 'cfps'@'localhost';
+FLUSH PRIVILEGES;
+```
 
 运行以下命令初始化数据库
 
