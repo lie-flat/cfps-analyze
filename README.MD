@@ -153,27 +153,37 @@ ipython -i process/cfps_shell.py
 ```python
 In [2]: cfps2011
 Out[2]: 
-namespace(adult=<__main__.StataDetail at 0x1f89da19db0>,
-          child=<__main__.StataDetail at 0x1f89da19ea0>,
-          family=<__main__.StataDetail at 0x1f89da19f00>,
-          famroster=<__main__.StataDetail at 0x1f89da19f30>)
+namespace(adult=StataDetail(2011, adult_102014, primary:pid),
+          child=StataDetail(2011, child_102014, primary:pid),
+          family=StataDetail(2011, family_202008, primary:fid),
+          famroster=StataDetail(2011, famroster_202008, primary:pid))
 In [3]: cfps[2012]
 Out[3]: 
-namespace(adult=<__main__.StataDetail at 0x1f89da19ba0>,
-          child=<__main__.StataDetail at 0x1f89da19f90>,
-          famconf=<__main__.StataDetail at 0x1f89da19ff0>,
-          famecon=<__main__.StataDetail at 0x1f89da19fc0>)
+namespace(adult=StataDetail(2012, adult_201906, primary:pid),
+          child=StataDetail(2012, child_201906, primary:pid),
+          famconf=StataDetail(2012, famconf_092015, primary:('pid', 'fid12')),
+          famecon=StataDetail(2012, famecon_201906, primary:fid12))
 ```
 
 然后，您可以通过各个字段访问数据和元数据。
 
 ```python
-cfps2011.adult.year # 2011
+# 可以用数组形式访问对应年的数据
+cfps[2011].adult.year # 2011
+# 也可以直接用变量名访问
 cfps2011.adult.key # adult_102014
 cfps2011.adult.primary # pid
 cfps2011.adult.path # 'dataset/CFPS 2011/Data/Stata/cfps2011adult_102014.dta'
 cfps2011.adult.schema # 返回 Schema 字典
 cfps2011.adult.data # 返回 Pandas DataFrame (Lazy load)
+cfps2012.adult.rural # 返回乡村地区数据
+cfps2012.adult.urban # 返回城镇地区数据
+# 也可以以索引的形式访问
+cfps2012.adult["urban"] # 返回城镇地区数据
+cfps2016.child["east"] # 返回东部地区数据
+cfps2016.child["west"] # 返回西部地区数据
+cfps2018.person["west", "rural"] # 返回西部乡村数据
+cfps2018.person["northeast", "urban"] # 返回东北部城镇数据
 ```
 
 ### 直接写入数据库

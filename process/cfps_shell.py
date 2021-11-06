@@ -8,6 +8,7 @@ from functools import reduce
 
 
 from data_format import datafmt
+from constants import regions
 
 
 def set_global(key, value):
@@ -17,21 +18,15 @@ def set_global(key, value):
 def get_data_dir(year):
     return f"dataset/CFPS {year}"
 
-def get_primary_key(k,year):
+
+def get_primary_key(k, year):
     if "adult" in k or 'child' in k or 'person' in k or 'famroster' in k:
         return 'pid'
     elif 'famecon' in k:
-        match year:
-            case 2016:
-                return 'fid16'
-            case 2018:
-                return 'fid18'
-            case 2014:
-                return 'fid14'
-            case 2012:
-                return 'fid12'
-            case 2010:
-                return 'fid'
+        if year == 2010:
+            return 'fid'
+        else:
+            return f'fid{str(year)[-2:]}'
     elif 'family' in k:
         return 'fid'
     elif 'comm' in k:
@@ -41,8 +36,9 @@ def get_primary_key(k,year):
             case 2010:
                 return 'cid'
     elif 'famconf' in k:
-        return 'pid', get_primary_key('famecon',year)
-    
+        return 'pid', get_primary_key('famecon', year)
+
+
 class StataDetail:
     def __init__(self, year, vk):
         self.year = year
@@ -50,7 +46,70 @@ class StataDetail:
         self.schema = read_json(self.path + ".schemas.json")
         self.key = vk
         self._data = None
+        self._rural = None
+        self._urban = None
         self.primary = get_primary_key(vk, year)
+        self.compute_urban = self.__rural_urban_compute_function_generator(
+            "urban", 1)
+        self.compute_rural = self.__rural_urban_compute_function_generator(
+            "rural", 0)
+
+    def __repr__(self):
+        return f"StataDetail({self.year}, {self.key}, primary:{self.primary})"
+
+    def __get_provcd_index(self):
+        if self.year <= 2012:
+            return "provcd"
+        else:
+            return f"provcd{str(self.year)[-2:]}"
+
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            if key == "data":
+                return self.data
+            if key in regions:
+                return self.data[self.data[self.__get_provcd_index()].isin(regions[key])]
+            if key in {"urban", "rural"}:
+                return self.rural if key == "rural" else self.urban
+        if isinstance(key, tuple):
+            if len(key) != 2:
+                raise ValueError(f"Invalid key: {key}")
+
+            def combine_urban_rural_and_region(r, key):
+                if key not in {"urban", "rural"}:
+                    raise ValueError(f"Invalid key: {key}")
+                if r in regions:
+                    return getattr(self, key)[getattr(self, key)[self.__get_provcd_index()].isin(regions[r])]
+                else:
+                    raise ValueError(f"Invalid region: {r}")
+            return combine_urban_rural_and_region(*key)
+
+    def __rural_urban_compute_function_generator(self, prefix, target_value):
+        def compute():
+            if "famconf" in self.key:
+                raise NotImplementedError(
+                    f"{prefix} computation not implemented for famconf.")
+            elif "famroster" in self.key:
+                raise NotImplementedError(
+                    f"{prefix} computation not implemented for famroster.")
+            else:
+                if self.year < 2012:
+                    return self.data[self.data["urban"] == target_value]
+                else:
+                    return self.data[self.data[f"urban{str(self.year)[-2:]}"] == target_value]
+        return compute
+
+    @property
+    def rural(self):
+        if self._rural is None:
+            self._rural = self.compute_rural()
+        return self._rural
+
+    @property
+    def urban(self):
+        if self._urban is None:
+            self._urban = self.compute_urban()
+        return self._urban
 
     @property
     def data(self):
