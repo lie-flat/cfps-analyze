@@ -8,7 +8,7 @@ from functools import reduce
 
 
 from data_format import datafmt
-from constants import regions
+from constants import REGIONS
 
 
 def set_global(key, value):
@@ -67,8 +67,8 @@ class StataDetail:
         if isinstance(key, str):
             if key == "data":
                 return self.data
-            if key in regions:
-                return self.data[self.data[self.__get_provcd_index()].isin(regions[key])]
+            if key in REGIONS:
+                return self.data[self.data[self.__get_provcd_index()].isin(REGIONS[key])]
             if key in {"urban", "rural"}:
                 return self.rural if key == "rural" else self.urban
         if isinstance(key, tuple):
@@ -78,8 +78,8 @@ class StataDetail:
             def combine_urban_rural_and_region(r, key):
                 if key not in {"urban", "rural"}:
                     raise ValueError(f"Invalid key: {key}")
-                if r in regions:
-                    return getattr(self, key)[getattr(self, key)[self.__get_provcd_index()].isin(regions[r])]
+                if r in REGIONS:
+                    return getattr(self, key)[getattr(self, key)[self.__get_provcd_index()].isin(REGIONS[r])]
                 else:
                     raise ValueError(f"Invalid region: {r}")
             return combine_urban_rural_and_region(*key)
