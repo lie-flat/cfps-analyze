@@ -1,2 +1,3 @@
-dataset/
+dataset/**/*.dta
+dataset/**/*.json
 **/__pycache__/
