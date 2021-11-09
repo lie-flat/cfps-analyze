@@ -124,6 +124,9 @@ class ObjectDict(types.SimpleNamespace):
 
     def __iter__(self):
         return iter(self.__dict__)
+    
+    def __len__(self):
+        return len(self.__dict__)
 
 
 def make_data_obj(year, value):
