@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from functools import reduce
 
-
 from data_format import datafmt
 from constants import REGIONS
 
@@ -82,6 +81,7 @@ class StataDetail:
                     return getattr(self, key)[getattr(self, key)[self.__get_provcd_index()].isin(REGIONS[r])]
                 else:
                     raise ValueError(f"Invalid region: {r}")
+
             return combine_urban_rural_and_region(*key)
 
     def __rural_urban_compute_function_generator(self, prefix, target_value):
@@ -97,6 +97,7 @@ class StataDetail:
                     return self.data[self.data["urban"] == target_value]
                 else:
                     return self.data[self.data[f"urban{str(self.year)[-2:]}"] == target_value]
+
         return compute
 
     @property
@@ -124,7 +125,7 @@ class ObjectDict(types.SimpleNamespace):
 
     def __iter__(self):
         return iter(self.__dict__)
-    
+
     def __len__(self):
         return len(self.__dict__)
 

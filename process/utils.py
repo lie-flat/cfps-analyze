@@ -1,6 +1,7 @@
 import json
 import sys
 
+
 def read_json(fp):
     with open(fp, encoding="utf-8") as f:
         return json.load(f)
@@ -9,6 +10,7 @@ def read_json(fp):
 def write_json(obj, fp):
     with open(fp, 'w', encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, indent=4)
+
 
 def require_python_310():
     version = sys.version_info

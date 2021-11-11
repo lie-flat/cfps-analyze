@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import os
 import sys
+from utils import require_python_310
 
 BASIC_MAPPING_A = {-10: '无法判断', -9: '缺失', -8: '不适用', -2: '拒绝回答', -1: '不知道'}
 BASIC_MAPPING_B = {-9: '缺失', -8: '不适用', -2: '拒绝回答', -1: '不知道'}
@@ -90,11 +91,7 @@ def write_sta_file_variable_schemas(reader, df, sta_path):
 
 
 if __name__ == "__main__":
-    version = sys.version_info
-    if version.major != 3 or version.minor < 10:
-        print(
-            f"错误：不兼容的 Python 版本： {version.major}.{version.minor}\n请使用 Python 3.10 或更高版本来运行此脚本")
-        sys.exit(1)
+    require_python_310()
     if len(sys.argv) != 3:
         print("错误！参数不足。")
         sys.exit(1)

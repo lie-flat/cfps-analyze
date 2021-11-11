@@ -33,14 +33,16 @@ def analyze_year(year):
             schemas[file]["fields"] = set(schemas[file]["schema"].keys())
     common_fields = reduce(
         set.intersection, (s["fields"] for s in schemas.values()))
+
     def analyze_combination(ncom):
         r = {}
         for ss in combinations(schemas.keys(), ncom):
-            cmmn = reduce(set.intersection, (schemas[x]["fields"] for x in ss))\
+            cmmn = reduce(set.intersection, (schemas[x]["fields"] for x in ss)) \
                 .difference(common_fields)
             r[reduce(lambda x, y: f"{x}|{y}", map(
                 get_title_from_schema_filename, ss))] = list(cmmn)
         return r
+
     write_json({
         "common": list(common_fields),
         "n2": analyze_combination(2),
@@ -68,7 +70,7 @@ if __name__ == "__main__":
             analyze_year(year)
             print("OK")
         case "years":
-            for year in 2010,2011,2012,2014,2016,2018:
+            for year in 2010, 2011, 2012, 2014, 2016, 2018:
                 analyze_year(year)
             print("OK")
         case _:

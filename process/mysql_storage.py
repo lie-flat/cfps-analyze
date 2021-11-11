@@ -7,11 +7,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-
 USER = "cfps"
 SERVER = "localhost"
 PASSWORD = "cfpsMySQL111++"
-
 
 db = mysql.connector.connect(
     host=SERVER,
@@ -60,7 +58,7 @@ def insert_into_table(dat, schema, table, dry=False):
         pv = preprocess_value(v)
         if not dry:
             cursor.execute(
-                f"insert into {table} values ({('%s,'*dat.shape[1])[:-1]})", pv)
+                f"insert into {table} values ({('%s,' * dat.shape[1])[:-1]})", pv)
 
 
 def init_db():
@@ -89,13 +87,13 @@ def create_table_for_schema_if_not_exists(info_obj, table_name):
 
 def schema_to_table_sql(schema, primary, table_name):
     return 'CREATE TABLE IF NOT EXISTS ' + table_name + '(' + \
-        ','.join(
-            (k + ' ' + type_to_mysql_type(v) +
+           ','.join(
+               (k + ' ' + type_to_mysql_type(v) +
                 ('' if k != primary else ' PRIMARY KEY')
-             for k, v in sorted(schema.items()))
-        ) +\
-        (f' ,PRIMARY KEY {sprintf_tuple_without_quotes(primary)}' if isinstance(primary, tuple) else '') +\
-        ') ENGINE=MYISAM DEFAULT CHARSET=utf8;'
+                for k, v in sorted(schema.items()))
+           ) + \
+           (f' ,PRIMARY KEY {sprintf_tuple_without_quotes(primary)}' if isinstance(primary, tuple) else '') + \
+           ') ENGINE=MYISAM DEFAULT CHARSET=utf8;'
 
 
 def get_integer_type_for_max_value(m):
