@@ -8,6 +8,7 @@ from functools import reduce
 
 from data_format import datafmt
 from constants import REGIONS
+from cfpsql import begin_cfpsql_session
 
 
 def set_global(key, value):
@@ -144,3 +145,5 @@ cfps = {}
 for year in datafmt:
     set_global(f"cfps{year}", make_data_obj(year, datafmt[year]))
     cfps[year] = globals()[f"cfps{year}"]
+
+cfpsql = begin_cfpsql_session
