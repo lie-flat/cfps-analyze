@@ -6,6 +6,7 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import re
 
 USER = "cfps"
 SERVER = "localhost"
@@ -89,11 +90,28 @@ def schema_to_table_sql(schema, primary, table_name):
     return 'CREATE TABLE IF NOT EXISTS ' + table_name + '(' + \
            ','.join(
                (k + ' ' + type_to_mysql_type(v) +
-                ('' if k != primary else ' PRIMARY KEY')
+                ('' if k != primary else ' PRIMARY KEY')  # + f' COMMENT "{re.escape(v["key"])}"'
                 for k, v in sorted(schema.items()))
            ) + \
            (f' ,PRIMARY KEY {sprintf_tuple_without_quotes(primary)}' if isinstance(primary, tuple) else '') + \
            ') ENGINE=MYISAM DEFAULT CHARSET=utf8;'
+
+
+def add_comments_to_db(start=2010, end=2018):
+    for year in cfps:
+        if start <= year <= end:
+            for table_base_name in cfps[year]:
+                obj = cfps[year][table_base_name]
+                add_comment_from_schema(obj.schema, obj.primary, f"{table_base_name}_{year}")
+
+
+def add_comment_from_schema(schema, primary, table_name):
+    print(f"Adding column comments for table {table_name}")
+    cursor.execute("use cfps;")
+    for k, v in tqdm(schema.items()):
+        sql = f"alter table {table_name} modify column {k} {type_to_mysql_type(v)}" + \
+              f' comment "{re.escape(v["key"])}"'
+        cursor.execute(sql)
 
 
 def get_integer_type_for_max_value(m):
@@ -161,6 +179,8 @@ if __name__ == "__main__":
             write_one_to_db(int(year), table_base_name)
         case ["db", "write-one"]:
             print("参数不足！")
+        case ["db", "add-comments"]:
+            add_comments_to_db()
         case ["dry", "write", start, end]:
             write_to_db(int(start), int(end), dry=True)
         case ["dry", "write", start]:
