@@ -1,0 +1,4 @@
+adult = {}
+child = {}
+family = {}
+community = {}
