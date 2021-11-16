@@ -1,3 +1,5 @@
 dataset/**/*.dta
-dataset/**/*.json
+dataset/**/*.dta.schemas.json
+dataset/**/*.dta.labels.json
+dataset/**/common.schemas.json
 **/__pycache__/
