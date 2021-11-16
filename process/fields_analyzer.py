@@ -3,16 +3,8 @@ import sys
 import os
 from functools import reduce
 from itertools import combinations
-
-
-def read_json(fp):
-    with open(fp, encoding="utf-8") as f:
-        return json.load(f)
-
-
-def write_json(obj, fp):
-    with open(fp, 'w', encoding="utf-8") as f:
-        json.dump(obj, f, ensure_ascii=False, indent=4)
+from cfps_shell import cfps
+from utils import read_json, write_json
 
 
 def data_path(year):
@@ -52,6 +44,27 @@ def analyze_year(year):
     }, f"dataset/CFPS {year}/common.schemas.json")
 
 
+def analyze_cross_year():
+    adult = {x: cfps[x]["adult"].schema for x in range(2010, 2017, 2)}
+    adult[2018] = cfps[2018].person.schema
+    child = {x: cfps[x]["child"].schema for x in range(2010, 2017, 2)}
+    child[2018] = cfps[2018].person.schema
+    comm = {2010: cfps[2010].comm.schema, 2014: cfps[2014].comm.schema}
+    famecon = {x: cfps[x]["famecon"].schema for x in range(2010, 2019, 2)}
+    famconf = {x: cfps[x]["famconf"].schema for x in range(2010, 2019, 2)}
+
+    def analyze_combination(schemas, ncom):
+        r = {}
+        for ss in combinations(schemas.keys(), ncom):
+            cmmn = reduce(set.intersection, (set(schemas[x].keys()) for x in ss))
+            r[reduce(lambda x, y: f"{x}|{y}", ss)] = list(cmmn)
+        return r
+
+    for var in ("adult", "child", "comm", "famecon", "famconf"):
+        value = locals()[var]
+        write_json({x: analyze_combination(value, x) for x in range(2, len(value) + 1)}, f"docs/{var}.json")
+
+
 if __name__ == "__main__":
     version = sys.version_info
     if version.major != 3 or version.minor < 10:
@@ -72,6 +85,9 @@ if __name__ == "__main__":
         case "years":
             for year in 2010, 2011, 2012, 2014, 2016, 2018:
                 analyze_year(year)
+            print("OK")
+        case "cross-year":
+            analyze_cross_year()
             print("OK")
         case _:
             print("指令不存在")
