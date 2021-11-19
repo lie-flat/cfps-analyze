@@ -1,5 +1,5 @@
 import sys
-from utils import require_python_310
+from utils import require_python_310, read_json
 from cfps_shell import cfps
 import mysql.connector
 from functools import reduce
@@ -161,6 +161,72 @@ def type_to_mysql_type(s):
             raise ValueError("Invalid type in schema")
 
 
+def filter_db():
+    cursor.execute("use cfps;")
+    years = range(2010, 2019, 2)
+    for year in years:
+        for table_base_name in cfps[year]:
+            if table_base_name not in {"crossyearid", "famconf"}:
+                table_name = f"{table_base_name}_{year}"
+                # full_set = set(cfps[year][table_base_name].schema.keys())
+                print(f"Filtering {table_name}")
+                interested_set = set(cfps[year][table_base_name].filtered_labels.keys())
+                if len(interested_set) > 0:
+                    cursor.execute(f"drop view if exists {table_name};")
+                    sql = f"create view {table_name}_clean as select " + ",".join(
+                        interested_set) + f" from {table_name}"
+                    cursor.execute(sql)
+                else:
+                    print(f"No filtered labels found for {table_name}")
+                # diff = full_set - interested_set
+
+                # for col in tqdm(diff):
+                #     sql = f"alter table {table_name} drop column {col}"
+                #     cursor.execute(sql)
+
+
+def is_integer(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
+def decompose_table(table_base_name, year, postfix, conf):
+    print(f"Processing {year}...")
+    cursor.execute("use cfps;")
+    if year == 2018:
+        if table_base_name == "adult":
+            table_base_name = "person"
+        elif table_base_name == "child":
+            table_base_name = "childproxy"
+    table_name = f"{table_base_name}_{year}_{postfix}"
+    cols = ','.join(conf["columns"] if isinstance(conf["columns"], list) else conf["columns"].keys())
+    if isinstance(conf["condition"], dict):
+        cond = conf["condition"][str(year)]
+    else:
+        cond = conf["condition"].format(year=year)
+    cursor.execute(f"drop view if exists {table_name};")
+    sql = f"create view {table_name} as select {cols} from {table_base_name}_{year} where {cond};"
+    cursor.execute(sql)
+
+
+def decompose(config_path):
+    config = read_json(config_path)
+    table_base_name = config["table"]
+    postfix = config["postfix"]
+    for key in config:
+        if '|' in key:
+            key_split = key.split('|')
+            years = map(int, key_split)
+            for year in years:
+                decompose_table(table_base_name, year, postfix, config[key])
+        if is_integer(key):
+            year = int(key)
+            decompose_table(table_base_name, year, postfix, config[key])
+
+
 if __name__ == "__main__":
     require_python_310()
     if len(sys.argv) < 3:
@@ -181,6 +247,12 @@ if __name__ == "__main__":
             print("参数不足！")
         case ["db", "add-comments"]:
             add_comments_to_db()
+        case ["db", "filter"]:
+            filter_db()
+        case ["db", "decompose", config_path]:
+            decompose(config_path)
+        case ["db", "decompose"]:
+            print("参数不足！")
         case ["dry", "write", start, end]:
             write_to_db(int(start), int(end), dry=True)
         case ["dry", "write", start]:
