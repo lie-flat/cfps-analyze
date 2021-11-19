@@ -3,7 +3,7 @@ import os
 from functools import reduce
 from itertools import combinations
 from cfps_shell import cfps
-from utils import read_json, write_json
+from utils import read_json, write_json, require_python_310
 import re
 
 
@@ -172,11 +172,7 @@ def analyze_cross_year():
 
 
 if __name__ == "__main__":
-    version = sys.version_info
-    if version.major != 3 or version.minor < 10:
-        print(
-            f"错误：不兼容的 Python 版本： {version.major}.{version.minor}\n请使用 Python 3.10 或更高版本来运行此脚本")
-        sys.exit(1)
+    require_python_310()
     if len(sys.argv) < 2:
         print("错误！参数不足。")
         sys.exit(1)

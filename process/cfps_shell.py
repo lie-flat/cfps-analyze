@@ -44,6 +44,13 @@ class StataDetail:
         self.year = year
         self.path = f"{get_data_dir(year)}/Data/Stata/cfps{year}{vk}.dta"
         self.schema = read_json(self.path + ".schemas.json")
+        try:
+            self.filtered_labels = read_json(self.path + ".important.json")
+        except:
+            if "famconf" not in vk and "crossyearid" not in vk and year != 2011:
+                self.filtered_labels = {}
+                print(f"[WARN]: Failed to load filtered labels for {self.path}.")
+
         self.key = vk
         self._data = None
         self._rural = None
