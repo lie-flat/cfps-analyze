@@ -270,3 +270,94 @@ python process/mysql_storage.py db write-one <year> <table_base_name>
 python process/mysql_storage.py db write-one 2011 adult
 ```
 
+### 数据筛选与清洗
+
+出于本次大作业要求，我们需要保留原始数据库，因此我们保留了所有原始表格，自己再新建一些表格/视图来存放清洗后的数据
+
+运行以下命令来进行数据筛选，筛选后形成的新表的名称会带有 clean 后缀，如： `adult_2010_clean`
+
+```bash
+python process/mysql_storage.py db filter
+```
+
+然后，可以运行以下命令来分解部分表格
+
+```bash
+python process/mysql_storage.py db decompose <配置文件路径>
+```
+
+配置文件的语法如下所示：
+
+decompositions/child.json
+
+```json
+{
+  "table": "child",
+  "postfix": "infant",
+  "2012|2014": {
+    "condition": "cfps{year}_age<2",
+    "columns": [
+      "wb8",
+      "wf701",
+      "wd2",
+      "wf603m",
+      "wa103",
+      "wa105b",
+      "wz302",
+      "wf605m",
+      "wg305",
+      "wb701",
+      "wg302",
+      "wd402",
+      "wb401",
+      "wb801",
+      "wf501",
+      "pid"
+    ]
+  },
+  "2010": {
+    "condition": "childgroup=1",
+    "columns": {
+      "pid": "pid",
+      "wa101": "孩子的胎龄（月）",
+      "wa102": "孩子出生时的体重（斤）",
+      "wa103": "孩子现在的体重（斤）",
+      "wa104": "孩子现在的身高（厘米）"
+    }
+  },
+  "2016|2018": {
+    "condition": {
+      "2016": "cfps_age<2",
+      "2018": "age<2"
+    },
+    "columns": [
+      "wb8",
+      "wf701",
+      "wd2",
+      "wf603m",
+      "wa103",
+      "wa105b",
+      "wz302",
+      "wf605m",
+      "wg305",
+      "wb701",
+      "wg302",
+      "wd402",
+      "wb401",
+      "wb801",
+      "wf501",
+      "pid"
+    ]
+  }
+}
+```
+
+配置文件的语法非常灵活，您需要把要处理的表格名称存在 `table` 中，后缀存到 `postfix` 中，这样生成的新表格的名称就是 `child_2010_infant` 这样子的.
+
+当一个设置适用于多年时，您可以将各年以 `|` 分隔作为键。
+
+当多个年的所选数据相同，而查询条件不同时，您也可以将 `condition` 写成一个字典。
+
+另外，我们支持在 `condition` 中插值，您可以使用 `{year}` 这样的插值字符串来处理诸如 `cfps2012_age` 这种变量。
+
+您应该将需要选取的变量书写在 `columns` 中，无论是列表还是字典，我们的程序都能妥善处理
