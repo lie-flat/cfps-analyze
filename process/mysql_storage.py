@@ -172,7 +172,7 @@ def filter_db():
                 print(f"Filtering {table_name}")
                 interested_set = set(cfps[year][table_base_name].filtered_labels.keys())
                 if len(interested_set) > 0:
-                    cursor.execute(f"drop view if exists {table_name};")
+                    cursor.execute(f"drop view if exists {table_name}_clean;")
                     sql = f"create view {table_name}_clean as select " + ",".join(
                         interested_set) + f" from {table_name}"
                     cursor.execute(sql)
