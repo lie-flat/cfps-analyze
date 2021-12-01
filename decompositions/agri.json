@@ -1,6 +1,6 @@
 {
     "table": "famecon",
-    "postfix": "argi",
+    "postfix": "agri",
     "2018": {
         "condition": "fk1l=1",
         "columns": {
