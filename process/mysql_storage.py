@@ -102,10 +102,10 @@ def add_comments_to_db(start=2010, end=2018):
         if start <= year <= end:
             for table_base_name in cfps[year]:
                 obj = cfps[year][table_base_name]
-                add_comment_from_schema(obj.schema, obj.primary, f"{table_base_name}_{year}")
+                add_comment_from_schema(obj.schema, f"{table_base_name}_{year}")
 
 
-def add_comment_from_schema(schema, primary, table_name):
+def add_comment_from_schema(schema, table_name):
     print(f"Adding column comments for table {table_name}")
     cursor.execute("use cfps;")
     for k, v in tqdm(schema.items()):
@@ -129,7 +129,7 @@ def get_integer_type_for_max_value(m):
         raise ValueError("Invalid max value.")
 
 
-def get_integer_type_for_range(mm, r):
+def get_integer_type(mm, r):
     mm = [m for m in mm if not pd.isna(m)]
     mm.append(0)  # Avoid empty sequence
     if isinstance(r, dict):
@@ -144,11 +144,11 @@ def get_integer_type_for_range(mm, r):
 def type_to_mysql_type(s):
     match s:
         case {"type": 'int32', "minmax": mm, "range": r}:
-            return get_integer_type_for_range(mm, r)
+            return get_integer_type(mm, r)
         case {"type": 'float64'}:
             return 'FLOAT'
         case {"type": 'enum', "minmax": mm, "range": r}:
-            return get_integer_type_for_range(mm, r)
+            return get_integer_type(mm, r)
         case {"type": 'int8'}:
             return 'TINYINT(1)'
         case {"type": 'int16'}:
@@ -172,7 +172,7 @@ def filter_db():
                 print(f"Filtering {table_name}")
                 interested_set = set(cfps[year][table_base_name].filtered_labels.keys())
                 if len(interested_set) > 0:
-                    cursor.execute(f"drop view if exists {table_name};")
+                    cursor.execute(f"drop view if exists {table_name}_clean;")
                     sql = f"create view {table_name}_clean as select " + ",".join(
                         interested_set) + f" from {table_name}"
                     cursor.execute(sql)

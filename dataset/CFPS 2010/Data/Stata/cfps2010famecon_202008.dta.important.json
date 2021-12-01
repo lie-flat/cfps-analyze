@@ -3,9 +3,6 @@
     "cid": "村居样本代码",
     "provcd": "省代码",
     "countyid": "区县顺序码",
-    "psu": "primary sampling unit",
-    "subpopulation": "抽样子总体",
-    "subsample": "是否在全国再抽样样本中",
     "urban": "基于国家统计局资料的城乡分类变量",
     "fa1": "从您家到最近的公交站点有多远(单位：米)",
     "fa2": "候车时间一般是（单位：分钟）",
@@ -117,7 +114,5 @@
     "eptran": "转移性支出",
     "epwelf": "福利性支出",
     "mortage": "建房购房贷款支出",
-    "expense": "家庭总支出",
-    "interviewerid": "访员编号",
-    "releaseversion": ""
+    "expense": "家庭总支出"
 }
