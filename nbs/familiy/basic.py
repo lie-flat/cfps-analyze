@@ -26,7 +26,7 @@ def get(mysql_command : str) -> list:
 def count(mysql_table : str, condition : str = '') -> int:
     '''
     Return the row number of a table under a condition.
-    Equals "SELECT COUNT(*) FROM table WHERE condition".
+    Equals "SELECT COUNT(*) FROM {table} WHERE {condition}".
     '''
     if condition:
         cursor.execute(
@@ -74,3 +74,55 @@ def multicount(mysql_table_prefix: str,
     elif type(conditions) == list:
         return [count(mysql_table_prefix + '_' + str(year), condition)
         for year, condition in zip(years, conditions)]
+
+def csum(mysql_table: str, column: str, condition: str=''):
+    '''
+    Get the sum of one column under a condition.
+    '''
+    if condition:
+        mysql_command = 'SELECT SUM({column}) FROM {table} WHERE {cond}'.format(
+            column=column, table=mysql_table, cond=condition
+        )
+    else:
+        mysql_command = 'SELECT SUM({column}) FROM {table}'.format(
+            column=column, table=mysql_table
+        )
+
+    # print(mysql_command)
+    cursor.execute(mysql_command)
+    return cursor.fetchall()[0][0]
+
+def urban_cond(year_index: int, is_urban: bool=True) -> str:
+    '''
+    Return the condition which can add to find out urban
+    :param year_index: 0,1,2,3,4 for 2010, 2012, 2014, 2016, 2018.
+    :param is_urban: True for urban and False for rural.
+    '''
+    URBAN_COLUMNS = ['urban', 'urban12', 'urban14', 'urban16', 'urban18']
+    # In "urban" column of the database, 0 for rural and 1 for urban.
+    return ' ' + URBAN_COLUMNS[year_index] + '=1 ' if is_urban else ' ' + URBAN_COLUMNS[year_index] + '=0 '
+
+def ratio(list_a: list, b: list or int or float, acc='.2f') -> list:
+    '''
+    Return the ratio of two items in lists.
+    :param acc: The format of output, '.2f' to reserve 2 slot of numbers
+    '''
+    if type(b) == list:
+        return [format(a/b_, acc) for a, b_ in zip(list_a, b)]
+    elif type(b) == int or float:
+        return [format(a/b, acc) for a in list_a]
+
+def myprint(string) -> None:
+    '''
+    Use to print without quotation mark(').
+    '''
+    print(repr(string).replace("'", ""))
+
+def average(source_data : list, number : int or list, to_int : bool = True):
+    if type(number) == int:
+        average_data = [value / number for value in source_data]
+    elif type(number) == list:
+        average_data = [value / num for value, num in zip(source_data, number)]
+    else:
+        raise TypeError('number请输入int或者list类型')
+    return [int(value) for value in average_data] if to_int else average_data
