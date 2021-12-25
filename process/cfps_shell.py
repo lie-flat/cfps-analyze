@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from functools import reduce
 
 from data_format import datafmt
-from constants import REGIONS
+from constants import REGIONS, PROVS
 from cfpsql import begin_cfpsql_session
 
 
@@ -17,6 +17,9 @@ def set_global(key, value):
 
 def get_data_dir(year):
     return f"dataset/CFPS {year}"
+
+def get_prov(provcd):
+    return PROVS[provcd if isinstance(provcd,str) else str(provcd if isinstance(provcd, int) else int(provcd))]
 
 
 def get_primary_key(k, year):
