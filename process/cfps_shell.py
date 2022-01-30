@@ -9,7 +9,6 @@ import os
 
 from data_format import datafmt
 from constants import REGIONS, PROVS
-from cfpsql import begin_cfpsql_session
 
 CFPS_SHELL_DATA_ROOT = os.environ.get('CFPS_SHELL_DATA_ROOT', '')
 
@@ -159,5 +158,3 @@ cfps = {}
 for year in datafmt:
     set_global(f"cfps{year}", make_data_obj(year, datafmt[year]))
     cfps[year] = globals()[f"cfps{year}"]
-
-cfpsql = begin_cfpsql_session
